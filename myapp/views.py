@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from .resources import AgencyResource
+from .resources import AgencyResource, SitePartResource
 from tablib import Dataset
 
 from django.contrib.auth import authenticate, login, logout
@@ -21,31 +21,23 @@ def index(request):
     return render(request, 'myapp/index.html')
 
 
-# def export(request):
-#     agency_resource = AgencyResource()
-#     dataset = agency_resource.export()
-#     response = HttpResponse(dataset.csv, content_type='text/csv')
-#     response['Content-Disposition'] = 'attachment; filename="agency.csv"'
-#     return response
+
 
 def simple_upload(request):
     # error_import = None
     # success_import = None
     if request.method == 'POST':
         agency_resource = AgencyResource()
-        # system_resource = SystemNoResource()
+        print(agency_resource)
+        sitepart_resource = SitePartResource()
+        print(sitepart_resource)
         dataset = Dataset()
         new_r = request.FILES['myfile']
 
-        # imported_data = dataset.load(new_r.read(),format='csv')
-        imported_data = Dataset().load(new_r.read().decode(), format='csv', headers=False)
-        print(imported_data)
-        # imported_data = dataset.load(new_r.read())
-        result = agency_resource.import_data(dataset, dry_run=True)  # Test the data import
-        # result = system_resource.import_data(dataset, dry_run=True)
-        # import pdb; pdb.set_trace();
-        # if result.is_valid():
+
         #     success_import = "import Successful..."
+        imported_data = dataset.load(new_r.read().decode("utf-8"), format='csv')
+        result = agency_resource.import_data(dataset, dry_run=True, raise_errors= True) 
         if not result.has_errors():
             # error_import = "Oops. something went wrong could not import..."
             agency_resource.import_data(dataset, dry_run=False)  # Actually import now
